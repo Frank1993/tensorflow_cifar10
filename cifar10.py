@@ -64,10 +64,38 @@ def inference(images):
     Returns:
       Logits.
     """
-
+    # conv1
     with tf.variable_scope("conv1") as scope:
-        kernel = tf.get_variable("weights",shape =[5,5,3,64] )
+        kernel = tf.get_variable("weights",shape =[5,5,3,64],initializer = tf.truncated_normal_initializer(1))
+        conv = tf.nn.conv2d(images,kernel,[1,1,1,1],padding = "SAME")
+        biases = tf.get_variable("biases",[64],tf.constant_initializer(0.0))
+        bias = tf.nn.bias_add(conv,biases)
+        conv1 = tf.nn.relu(bias,name = scope.name)
 
+    # pool1
+    pool1 = tf.nn.max_pool(conv1,ksize = [1,3,3,1],strides = [1,2,2,1], padding = "SAME",name = "pool1")
+
+    # normal
+    norm1 = tf.nn.lrn(pool1,4,bias = 1.0,alpha = 0.001/9.0, beta = 0.75)
+
+    # conv2
+    with tf.variable_scope("conv2") as scope:
+        kernel = tf.get_variable("weights", shape = [5,5,64,64], initializer = tf.truncated_normal_initializer(5e-2))
+
+        conv = tf.nn.conv2d(norm1,kernel,[1,1,1,1], padding = "SAME")
+        biases = tf.get_variable("biases",[64],tf.constant_initializer(0.1))
+        bias = tf.nn.bias_add(conv,biases)
+        conv2 = tf.nn.relu(bias,name = scope.name)
+        _activation_summary(conv2)
+
+    # norm2
+    norm2 = tf.nn.lrn(conv2,4,bias = 1.0, alpha = 0.001/9.0, beta = 0.75, name = "norm2")
+
+
+def _activation_summary(x):
+    tensor_name = x.op.name
+    tf.histogram_summary(tensor_name+"/activations",x)
+    tf.scalar_summary(tensor_name+"/sparsity",tf.nn.zero_fraction(x))
 
 
 

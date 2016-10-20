@@ -201,6 +201,7 @@ def inference(images):
   #
   # conv1
   with tf.variable_scope('conv1') as scope:
+    
     kernel = _variable_with_weight_decay('weights',
                                          shape=[5, 5, 3, 64],
                                          stddev=5e-2,
