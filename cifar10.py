@@ -65,6 +65,9 @@ def inference(images):
       Logits.
     """
 
+    with tf.variable_scope("conv1") as scope:
+        kernel = tf.get_variable("weights",shape =[5,5,3,64] )
+
 
 
 
