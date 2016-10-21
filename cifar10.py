@@ -59,7 +59,7 @@ def maybe_download_and_extract():
         print("Successfully downloaded",filename,statinfo.st_size,"bytes")
 
         tarfile.open(filepath,'r:gz').extractall(dest_directory)
-        
+
 def inputs():
     if not FLAGS.data_dir:
         raise ValueError("Please supply a data dir")
@@ -162,7 +162,7 @@ def train(loss,global_step):
 
     variable_averages_op = variable_averages.apply(tf.traiable_variables())
 
-    with tf.control_dependencies([,variable_averages_op]):
+    with tf.control_dependencies([minimize_op,variable_averages_op]):
         train_op = tf.no_op(name = "train")
 
     return train_op
