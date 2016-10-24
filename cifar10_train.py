@@ -14,7 +14,7 @@ import tensorflow as tf
 import cifar10
 
 
-FlGAS = tf.app.flags.FLAGS
+FLAGS = tf.app.flags.FLAGS
 
 tf.app.flags.DEFINE_string("train_dir","cifar10_data","""Directory where to write event logs and checkpoint.""")
 
@@ -49,9 +49,10 @@ def train():
 def main(argv = None):
 	cifar10.maybe_download_and_extract()
 
-	if tf.gfile.Exists(FlGAS.train_dir):
+	if tf.gfile.Exists(FLAGS.train_dir):
 		tf.gfile.DeleteRecursively(FLAGS.train_dir)
 
+	print(FLAGS.train_dir)
 	tf.gfile.MakeDirs(FLAGS.train_dir)
 
 	train()

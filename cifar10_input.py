@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 """Routine for decoding the cifar-10 binary files
 
 the cifar10 dataset has 10 different categories and each category is in one file.
@@ -27,7 +28,7 @@ def read_cifar10(filename_queue):
     image_height = 32
     image_width = 32
     image_depth = 3
-    image_bytes = image_height + image_width + image_depth
+    image_bytes = image_height * image_width * image_depth
     record_bytes = label_bytes + image_bytes
 
     reader = tf.FixedLengthRecordReader(record_bytes)

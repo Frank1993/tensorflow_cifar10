@@ -14,7 +14,7 @@ import gzip
 import  tensorflow as tf
 import  urllib
 
-
+from six.moves import urllib
 from cifar10_input import  *
 
 FLAGS = tf.app.flags.FLAGS
@@ -25,10 +25,10 @@ tf.app.flags.DEFINE_integer("batch_size",200, "number of examples used in one ba
 DATA_URL = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 
 # Global constants describing the CIFAR-10 data set.
-IMAGE_SIZE = cifar10_input.IMAGE_SIZE
-NUM_CLASSES = cifar10_input.NUM_CLASSES
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
+#IMAGE_SIZE = cifar10_input.IMAGE_SIZE
+#NUM_CLASSES = cifar10_input.NUM_CLASSES
+#NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
+#NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
 # Constants describing the training process.
 MOVING_AVERAGE_DECAY = 0.9999     # The decay to use for the moving average.
@@ -84,7 +84,7 @@ def inference(images):
     with tf.variable_scope("conv1") as scope:
         kernel = tf.get_variable("weights",shape =[5,5,3,64],initializer = tf.truncated_normal_initializer(1))
         conv = tf.nn.conv2d(images,kernel,[1,1,1,1],padding = "SAME")
-        biases = tf.get_variable("biases",[64],tf.constant_initializer(0.0))
+        biases = tf.get_variable("biases",[64], initializer=tf.constant_initializer(0.0))
         bias = tf.nn.bias_add(conv,biases)
         conv1 = tf.nn.relu(bias,name = scope.name)
 
@@ -99,7 +99,7 @@ def inference(images):
         kernel = tf.get_variable("weights", shape = [5,5,64,64], initializer = tf.truncated_normal_initializer(5e-2))
 
         conv = tf.nn.conv2d(norm1,kernel,[1,1,1,1], padding = "SAME")
-        biases = tf.get_variable("biases",[64],tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",[64], initializer=tf.constant_initializer(0.1))
         bias = tf.nn.bias_add(conv,biases)
         conv2 = tf.nn.relu(bias,name = scope.name)
         _activation_summary(conv2)
@@ -118,14 +118,14 @@ def inference(images):
         dim = reshape.get_shape()[1].value
         weights = tf.get_variable("weight",shape = [dim,384], initializer = tf.truncated_normal_initializer(1e-2))
 
-        biases = tf.get_variable("biases",[384],tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",[384], initializer=tf.constant_initializer(0.1))
 
         local3 = tf.nn.relu(tf.matmul(reshape,weights) + biases,name = scope.name)
 
     with tf.variable_scope("local4") as scope:
         weights = tf.get_variable("weight", shape = [384,192],initializer = tf.truncated_normal_initializer(1e-2))
 
-        biases = tf.get_variable("biases",[192],tf.constant_initializer(0.1))
+        biases = tf.get_variable("biases",[192],initializer=tf.constant_initializer(0.1))
 
         local4 = tf.nn.relu(tf.matmul(local3,weights) + biases, name = scope.name)
 
@@ -133,7 +133,7 @@ def inference(images):
     with tf.variable_scope("softmax_linear") as scope:
         weights = tf.get_variable("weight", [192,NUM_CLASSES], initializer = tf.truncated_normal_initializer(1e-2))
 
-        biases = tf.get_variable("biases", [NUM_CLASSES],tf.constant_initializer(0.0))
+        biases = tf.get_variable("biases", [NUM_CLASSES], initializer=tf.constant_initializer(0.0))
 
         softmax_linear = tf.add(tf.matmul(local4,weights), biases, name = scope.name)
 
@@ -151,7 +151,7 @@ def train(loss,global_step):
 
     decay_steps = int(num_batches_per_epoch* NUM_EPOCHS_PER_DECAY)
 
-    lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,global_step,decay_steps,LEARNING_RATE_DECAY_FACTOR, staircase = true)
+    lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,global_step,decay_steps,LEARNING_RATE_DECAY_FACTOR, staircase = True)
 
     optimizer = tf.train.AdamOptimizer(lr)
 
@@ -160,7 +160,7 @@ def train(loss,global_step):
     # Track the moving average of all trainable variable
     variable_averages = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY,global_step)
 
-    variable_averages_op = variable_averages.apply(tf.traiable_variables())
+    variable_averages_op = variable_averages.apply(tf.trainable_variables())
 
     with tf.control_dependencies([minimize_op,variable_averages_op]):
         train_op = tf.no_op(name = "train")
